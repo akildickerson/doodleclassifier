@@ -41,6 +41,13 @@ def train_one_epoch(
             val_total += batch_size
     val_loss = val_loss / val_total
     val_acc = val_correct / val_total
+    if val_loss < 0.05:
+        return {
+        "train loss": train_loss,
+        "train accuracy": train_acc,
+        "val loss": val_loss,
+        "val accuracy": val_acc,
+    }
 
     return {
         "train loss": train_loss,

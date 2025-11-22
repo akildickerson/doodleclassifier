@@ -7,11 +7,14 @@ from train import predict, train_one_epoch
 
 
 def init_device() -> torch.device:
-    if torch.backends.mps.is_available():
-        device = torch.device("mps")
-    elif torch.cuda.is_available():
+    if torch.cuda.is_available():
+        print("cuda")
         device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        print("mps")
+        device = torch.device("mps")
     else:
+        print("cpu")
         device = torch.device("cpu")
     return device
 
@@ -53,7 +56,7 @@ def main() -> None:
     for _ in range(CONFIG["training"]["epochs"]):
         res = train_one_epoch(model, train_loader, val_loader, optim, loss_fn, device)
         print(
-            f"train loss: {res["train loss"]:.2f}\ttrain accuracy: {res["train accuracy"]:.2f}\tvalidation loss: {res["val loss"]:.2f}\tvalidation accuracy: {res["val accuracy"]:.2f}"
+            f"train loss: {res["train loss"]:.2f}\ttrain accuracy: {100 * res["train accuracy"]:.2f}%\tvalidation loss: {res["val loss"]:.2f}\tvalidation accuracy: {100 * res["val accuracy"]:.2f}%"
         )
     accuracy = predict(model, test_loader, device)
     print(f"-------- TEST ACCURACY --------\n\t\t{accuracy:.2f}")
