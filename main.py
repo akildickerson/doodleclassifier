@@ -3,11 +3,10 @@ from config import CONFIG
 from models import CNN
 from dataset import DoodleDataset
 from torch.utils.data import DataLoader, random_split
-from torchvision.transforms import ToTensor
 from train import predict, train_one_epoch
 
 
-def init_device():
+def init_device() -> torch.device:
     if torch.backends.mps.is_available():
         device = torch.device("mps")
     elif torch.cuda.is_available():
@@ -17,12 +16,12 @@ def init_device():
     return device
 
 
-def init_dataloaders(csv_file, root_dir):
+def init_dataloaders(csv_file, root_dir) -> [DataLoader, DataLoader, DataLoader]:
     data = DoodleDataset(csv_file, root_dir)
     size = len(data)
     train_size = int(0.8 * size)
-    val_size   = int(0.1 * size)
-    test_size  = size - train_size - val_size
+    val_size = int(0.1 * size)
+    test_size = size - train_size - val_size
 
     train, val, test = random_split(
         data,
@@ -30,13 +29,13 @@ def init_dataloaders(csv_file, root_dir):
         generator=torch.Generator().manual_seed(42),
     )
     train_loader = DataLoader(train, batch_size=64, shuffle=True, num_workers=4)
-    val_loader = DataLoader(val, batch_size=64, shuffle=True, num_workers=4)
-    test_loader = DataLoader(test, batch_size=64, shuffle=True, num_workers=4)
+    val_loader = DataLoader(val, batch_size=64, shuffle=False, num_workers=4)
+    test_loader = DataLoader(test, batch_size=64, shuffle=False, num_workers=4)
 
     return train_loader, val_loader, test_loader
 
 
-def main():
+def main() -> None:
     csv_file = (
         "/Users/akildickerson/Projects/DoodleClassifier/data/processed/doodlelabels.csv"
     )
