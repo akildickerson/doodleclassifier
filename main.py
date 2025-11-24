@@ -32,8 +32,8 @@ def init_dataloaders(csv_file, root_dir) -> [DataLoader, DataLoader, DataLoader]
         generator=torch.Generator().manual_seed(42),
     )
     train_loader = DataLoader(train, batch_size=64, shuffle=True, num_workers=4)
-    val_loader = DataLoader(val, batch_size=64, shuffle=False, num_workers=4)
-    test_loader = DataLoader(test, batch_size=64, shuffle=False, num_workers=4)
+    val_loader = DataLoader(val, batch_size=64, shuffle=True, num_workers=4)
+    test_loader = DataLoader(test, batch_size=64, shuffle=True, num_workers=4)
 
     return train_loader, val_loader, test_loader
 
@@ -53,11 +53,33 @@ def main() -> None:
     )
     loss_fn = torch.nn.CrossEntropyLoss()
 
-    for _ in range(CONFIG["training"]["epochs"]):
+    best_acc = 0.0
+
+    for epoch in range(CONFIG["training"]["epochs"]):
         res = train_one_epoch(model, train_loader, val_loader, optim, loss_fn, device)
         print(
-            f"train loss: {res["train loss"]:.2f}\ttrain accuracy: {100 * res["train accuracy"]:.2f}%\tvalidation loss: {res["val loss"]:.2f}\tvalidation accuracy: {100 * res["val accuracy"]:.2f}%"
+            f"epoch {epoch+1:02d} | "
+            f"train loss: {res["train loss"]:.2f}\t"
+            f"train accuracy: {100 * res["train accuracy"]:.2f}%\t"
+            f"validation loss: {res["val loss"]:.2f}\t"
+            f"validation accuracy: {100 * res["val accuracy"]:.2f}%"
         )
+
+        if res["val accuracy"] > best_acc:
+            best_acc = res["val accuracy"]
+            torch.save(
+                {
+                    "epoch": epoch,
+                    "model_state": model.state_dict(),
+                    "optimizer_state": optim.state_dict(),
+                    "best_val_acc": best_acc,
+                },
+                "best_model.pt",
+            )
+    
+    checkpoint = torch.load("best_model.pt", map_location=device)
+    model.load_state_dict(checkpoint["model_state"])
+    model.to(device)
     accuracy = predict(model, test_loader, device)
     print(f"-------- TEST ACCURACY --------\n\t\t{accuracy:.2f}")
 

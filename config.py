@@ -1,8 +1,8 @@
 CONFIG = {
     "model": {
         "in_channels": 1,
-        "conv_channels": [16, 32],
-        "hidden_dims": [288, 128],
+        "conv_channels": [16, 32, 64],
+        "hidden_dims": [64, 128, 256],
         "num_classes": 14,
     },
     "optimizer": {
@@ -10,7 +10,7 @@ CONFIG = {
     },
     "training": {
         "batch_size": 32,
-        "epochs": 50,
+        "epochs": 25,
         "num_workers": 4
     },
     "loss": {
